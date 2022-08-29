@@ -24,6 +24,7 @@ app.use('/product', productRouter)
 app.use('/cart',auth,cartRouter)
 app.use('/checkout',auth, checkoutRouter)
 
+
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () =>{
     console.log('Server is running on port', PORT)
