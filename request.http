@@ -1,0 +1,52 @@
+POST http://localhost:5000/auth/register
+Content-Type: application/json
+
+{
+  "name": "Thanh Thao",
+  "email": "thanhthaothaothao2@gmail.com",
+  "password": "123456",
+  "address": "135 Tran Hung Dao, Q1",
+  "phone":"0846478719",
+  "dob": "01/01/2001"
+}
+
+###
+
+
+
+POST http://localhost:5000/auth/activation
+Content-Type: application/json
+
+{
+  "activation_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiVGhhbmggVGhhbyIsImFkZHJlc3MiOiIxMzUgVHJhbiBIdW5nIERhbywgUTEiLCJlbWFpbCI6InRoYW5odGhhb3RoYW90aGFvMkBnbWFpbC5jb20iLCJyb2xlIjowLCJwYXNzd29yZCI6IiQyYiQxMiR4SmdTTEpuMWJSdC40Q2VnRmE1VkkuL1AwMDE1bkRaZlN2NUZyTFVVc0xrQ0E5b0FQbFZzMiIsInBob25lIjoiMDg0NjQ3ODcxOSIsImlhdCI6MTY1NzgwMDgzMCwiZXhwIjoxNjU3ODAxNDMwfQ.MiisqEAGeP4H12Y6ygvr3DRR94LrFnbxYpfVB7SrIU0"
+}
+
+###
+
+GET http://localhost:5000/auth/refresh_token
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyYzJjMjNiYmMxZDIwYjQ2Yjc0MTM0NSIsImlhdCI6MTY1NjkzMDg3NSwiZXhwIjoxNjU2OTMxNTM1fQ.dYzBqWQDkiqI8xYn7RvfIv0qrUjo8rA25_yMAKLf4M4
+
+###
+
+POST http://localhost:5000/auth/login
+Content-Type: application/json
+
+{
+  "email": "thanhthaothaothao2@gmail.com",
+  "password": "123456"
+}
+
+
+
+###
+
+POST http://localhost:5000/auth/forgot
+Content-Type: application/json
+
+{
+  "email": "thanhthaothaothao2@gmail.com"
+}
+
+
+
+
