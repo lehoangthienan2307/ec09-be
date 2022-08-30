@@ -133,7 +133,9 @@ export const checkoutCtrl ={
             // Calculate final price
             const { totalOrder, totalPrice, shippingPrice } = price;
             const convertUSDPrice =  Math.round(100 * totalPrice /23000, 'VND') / 100;
-            
+            console.log(method)
+            console.log(totalPrice)
+            console.log(checkoutMethod)
             const [orderId, redirectUrl] = (method === 'Momo') ? (
                 await checkoutMethod.createLink(
                     totalPrice,
