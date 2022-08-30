@@ -13,8 +13,6 @@ export const productCtrl = {
             const page = req.query.page || 1;
             const offset = (page - 1) * limit;
 
-    
-
             let type_1 = false,type_2=false,type_3=false,type_4=false;
             let type_price = false,type_time = false
 
@@ -102,6 +100,18 @@ export const productCtrl = {
             return res.status(404).json({msg: 'This product does not exist.'})
     
           return res.status(200).json(product)
+        } catch (err) {
+          return res.status(500).json({msg: err.message})
+        }
+      },
+
+      getTopSale: async(req, res) => {
+        try {
+          const list= await productModel.findTopSale()
+          return res.status(200).send({
+            list
+          })
+    
         } catch (err) {
           return res.status(500).json({msg: err.message})
         }

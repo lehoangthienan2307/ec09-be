@@ -4,7 +4,7 @@ import config from "../config/constants.js";
 
 class MomoMethod {
     //
-    createLink = async (total, userInfo, redirectHost, ipnHost) => {
+    createLink = async (total, redirectHost, ipnHost) => {
         
         var partnerCode = config.MOMO_PARTNER_CODE;
         var accessKey = config.MOMO_ACCESS_KEY;
@@ -14,9 +14,9 @@ class MomoMethod {
         var orderInfo = "DH" + orderId;
         //link thong bao ket qua thanh toan
        // var redirectUrl = `${redirectHost}/....`;
-        var redirectUrl = `${redirectHost}/homepage`;
+        var redirectUrl = `${redirectHost}/returnUrl`;
         //var ipnUrl = "http://localhost:5000/api/checkout/momoNotify"; 
-        var ipnUrl = `${ipnHost}/api/checkout/momoNotify`; 
+        var ipnUrl = `${ipnHost}`; 
         var amount = total;
         var requestType = "captureWallet"
         var extraData = "";      
@@ -42,15 +42,14 @@ class MomoMethod {
             lang: 'en'
         };
         
-        console.log("test momo")
+        
         //Send the request and get the response
         const res = await axios.post(
             "https://test-payment.momo.vn:443/v2/gateway/api/create",
             requestBody
         )
-        console.log("test momo 2")
         
-        return [orderId, res.data.payUrl]
+        return [res.data.payUrl, orderId]
 
     }
 

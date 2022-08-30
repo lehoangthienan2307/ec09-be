@@ -7,55 +7,16 @@ import cartModel from '../models/cartModel.js'
 import orderModel from '../models/orderModel.js'
 import config from '../config/constants.js'
 import PaypalMethod from '../utils/PaypalCheckout.js';
+import MomoMethod from '../utils/MomoCheckout.js';
 import CodMethod from '../utils/ShipCodCheckout.js';
 import { sendEmailOrder } from "./sendMail.js";
-import MomoMethod from '../utils/MomoCheckout.js';
-
-
-
-
+import {getDistance} from '../utils/distance.js'
 
 
 export const checkoutCtrl ={
 
-     getProvinces: async (req, res) =>{
-        try {
-            const result = await addressModel.getProvinces();
-          
-            res.status(200).send({
-                provinces: result
-            })
-        } catch (err) {
-            next(err)
-        }
-    },
-
-     getDistricts: async(req, res)=> {
-        try {
-            const { TinhID } = req.body
-            const result = await addressModel.getDistricts(TinhID);
-           
-            res.status(200).send({
-                districts: result
-            })
-        } catch (err) {
-            res.json({msg:err.message})
-        }
-    },
-
-     getWards: async (req, res)=> {
-        try {
-            const { TinhID,QuanID } = req.body;
-            const result = await addressModel.getWards(TinhID, QuanID);
-            res.status(200).send({
-                wards: result
-            })
-        } catch (err) {
-            res.json({msg:err.message})
-        }
-    },
-
- 
+   
+   
 
     async getTempPrice(req, res, next) {
         try {
@@ -64,7 +25,7 @@ export const checkoutCtrl ={
                 province,
                 district,
                 ward, 
-                address,
+                address
             } = req.body;
 
             // Calculate total temp price
@@ -87,58 +48,29 @@ export const checkoutCtrl ={
               })
             }
 
-
-            // Calculate shipping fee
-            const des= `${address}, ${ward}, ${district}, ${province}`
-            let shippingPrice=0;
+            const distance = await getDistance(
+                province,
+                district,
+                ward, 
+                address
+            ) 
     
-                distance.apiKey = "AIzaSyCbuwQyCde1CjCoPllUUf9dpC4_6Iy8qCk"
-                distance.get(
-                    {	
-                        origin: "227 Nguyễn Văn Cừ, Phường 4, Quận 5, Thành phố Hồ Chí Minh", 
-                        destination: des,
-                        mode: 'driving',
-                        units: 'metric'
-                    }, 
-                    function(err, data) { 
-                        if (err) {
-                            console.error(err);
-                            return res.status(500).json({msg: err.message});
-                        }
-                        const shippingDistance = Math.round(data.distanceValue/1000);
-                        shippingPrice = 20000;
-                        if (shippingDistance > 3)
-                        {
-                            shippingPrice += (shippingDistance - 3)*10000
-                        }
-                        const totalPrice = total + shippingPrice;
+            let shippingPrice=20000 ;
+            if ((distance)/1000 > 2)
+					{
+						shippingPrice += (distance - 1)*10000
+					}
+            const totalPrice = total + shippingPrice;
           
-                        req.body.price = {
-                            totalOrder: total,
-                            shippingPrice: shippingPrice,
-                            totalPrice: totalPrice
-                        }
-                        req.body.items = items;
-                        req.body.des = data.destination;
-                        console.log(items)
-                        next();
-                    
-    
-                })
-               
-      
+            req.body.price = {
+                totalOrder: total,
+                shippingPrice: shippingPrice,
+                totalPrice: totalPrice
+            }
+            req.body.items = items;
+            console.log(items)
 
-            // Calculate total price
-            // const totalPrice = total + shippingPrice;
-          
-            // req.body.price = {
-            //     totalOrder: total,
-            //     shippingPrice: shippingPrice,
-            //     totalPrice: totalPrice
-            // }
-            // req.body.products = items;
-
-            // next();
+           next()
         } catch (err) {
             next(err)
         }
@@ -146,12 +78,11 @@ export const checkoutCtrl ={
 
     async getPrice(req, res, next) {
         try {
-            const { price, des } = req.body;
+            const { price } = req.body;
             res.status(200).send({
                 totalOrder: price.totalOrder,
                 shippingPrice: price.shippingPrice,
-                totalPrice: price.totalPrice,
-                destination: des
+                totalPrice: price.totalPrice
             })
         } catch (err) {
             next(err)
@@ -173,11 +104,11 @@ export const checkoutCtrl ={
 
             if (!province&& !district&& !ward&& !address) {
                 return res.status(200).send({
-                    message: "Shipping address null"
+                    message: "Shipping address invalid"
                 })
             }
 
-            // Get user information
+      
             const user = await userModel.findByEmail(email);
             const { name, phone } = user;
             const receiver_info = {
@@ -185,38 +116,36 @@ export const checkoutCtrl ={
                 name: name,
                 receiverPhone: phone
             }
-            const payment = await paymentModel.getById(PaymentID)
-            if (payment === null) {
-                return res.status(200).send({
-                    message: "Payment null"
-                })
-            }
-
-            const method = payment.method;
-            const checkoutMethod = ((method === 'Paypal') ? (
-                new PaypalMethod()
-                ) : ((method === 'Momo') ? (
-                    new MomoMethod()
-                ) : (
-                    new CodMethod()
-                )))
+   
+             const payment = await paymentModel.getById(PaymentID)
+     
+             const method = payment.method;
+             const checkoutMethod = (method === 'Momo') ? (
+                new MomoMethod()
+            ) :
+             ((method === 'Paypal') ? (
+                 new PaypalMethod()
+             ) : (
+                 new CodMethod()
+             ))  
+ 
 
             // Calculate final price
             const { totalOrder, totalPrice, shippingPrice } = price;
-            const convertUSDPrice = (100 * totalPrice )/ 23000;
-            
-            // Create orderId and link
+            const convertUSDPrice =  Math.round(100 * totalPrice /23000, 'VND') / 100;
+
+   
             const [orderId, redirectUrl] = await checkoutMethod.createLink(
-                totalPrice,
+                convertUSDPrice,
                 receiver_info,
                 `${req.headers.origin}`,
                 `${req.protocol}://${req.get('host')}`
+      
             );
-
-            console.log("test")
             console.debug(redirectUrl)
-
-            // Create order
+            console.log(orderId)
+      
+          
             const order = {
                 OrderID: orderId,
                 email: email,
@@ -229,15 +158,16 @@ export const checkoutCtrl ={
                 Total: totalPrice,
                 ShipPrice: shippingPrice
             }
-            await orderModel.createOrder(order)
+            await orderModel.createOrder(orderId,order)
             await orderModel.insertListDetailToOrder(orderId, items);
             await cartModel.deleteCart(email);
 
 
-            sendEmailOrder(to, order, items);
+            sendEmailOrder(email, order, items);
 
             // Response
             res.status(200).send({
+                exitcode: 0,
                 message: "Checkout successfully",
                 orderId: orderId,
                 redirectUrl: redirectUrl
@@ -246,6 +176,8 @@ export const checkoutCtrl ={
             next(err)
         }
     },
+
+
 
     async notifyPaypal(req, res, next) {
         try {
@@ -264,7 +196,7 @@ export const checkoutCtrl ={
             }
 
             const capture= await method.capturePayment(orderId);
-            if (captureResponse.status === "COMPLETED") {
+            if (capture.status === "COMPLETED") {
                 await orderModel.updateState(orderId, 'Xác nhận');
                 res.status(200).send({
                     message: "Payment has been captured"
@@ -280,6 +212,7 @@ export const checkoutCtrl ={
         }
     }
 
+    
     
 
  

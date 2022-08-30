@@ -134,9 +134,11 @@ export const userCtrl = {
 
     getUserInfor: async (req, res) => {
         try {
-            const user = await userModel.findByEmail(req.user)
-
-            res.json(user)
+            const account = await userModel.findByEmail(req.user)
+            
+            res.status(200).send({
+                account: account
+            })
         } catch (err) {
             return res.status(500).json({msg: err.message})
         }
@@ -177,15 +179,16 @@ export const userCtrl = {
 
               
                 await userModel.addAccount(newUser)
-                
+                const access_token= createAccessToken(email)
+
                 const refresh_token = createRefreshToken(email)
                 res.cookie('refreshtoken', refresh_token, {
                     httpOnly: true,
                     path: '/auth/refresh_token',
                     maxAge: 7*24*60*60*1000 // 7 days
                 })
-
-                res.json({msg: "Login success!"})
+                res.json({msg: "Login success!", access_token})
+               
             }
 
 

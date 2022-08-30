@@ -8,7 +8,7 @@ class CodMethod {
     }
 
     getCurrency = () => {
-        return 'vnd'
+        return 'VND'
     }
 }
 

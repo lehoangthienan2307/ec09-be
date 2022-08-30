@@ -20,7 +20,7 @@ class PaypalMethod {
     createLink = async (amount, userInfo, redirectHost, ipnHost) => {
         const intent = "CAPTURE";
         const description = "Pay with paypal";
-        const redirectUrl = `${redirectHost}/checkout/paypalState`
+        const redirectUrl = `${redirectHost}/checkout/notifyPaypal`
 
         const payer = {
             email_address: userInfo.email,
@@ -29,7 +29,7 @@ class PaypalMethod {
             },
             phone: {
                 phone_number: {
-                    national_number: userInfo.phone
+                    national_number: userInfo.receiverPhone
                 }
             },
             description: description
@@ -53,7 +53,7 @@ class PaypalMethod {
         const headerConfig = {
             headers: this.getAuthorize()
         }
-
+       
         const response = await axios.post(
             "https://api-m.sandbox.paypal.com/v2/checkout/orders",
             requestBody,
@@ -61,6 +61,7 @@ class PaypalMethod {
         )
 
         const { id, links } = response.data
+ 
         const [{ href }] = links.filter(item => (item.rel === "approve"))
         return [id, href]
     }

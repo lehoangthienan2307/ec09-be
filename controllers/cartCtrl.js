@@ -51,15 +51,7 @@ export default {
         try {
             const  email  = req.user;
             const { ProID, quantity } = req.body;
-            const product = await productModel.findByProID(ProID);
-            if (product === null)
-            {
-                return res.status(500).json({message: "Product does not exist"})
-            }
-            if (quantity <= 0) 
-            {
-                return res.status(500).json({message: "Invalid quantity"})
-            }
+
             const cart = await cartModel.getCart(email);
             const { CartID} = cart;
 
@@ -91,11 +83,7 @@ export default {
         try {
             const email = req.user;
             const { ProID, quantity } = req.body;
-            // const product = await productModel.findByProID(ProID);
-            // if (product === null)
-            // {
-            //     return res.status(500).json({message: "Product does not exist"})
-            // }
+
             if (quantity < 1) {
                 await cartModel.deleteFromCart(email, ProID);
 
@@ -129,12 +117,12 @@ export default {
             const result = await cartModel.deleteFromCart(email, ProID);
             if (result > 0) {
                 res.status(200).send({
-                   
+                    exitcode: 0,
                     message: "Delete item of cart successfully"
                 })
             } else {
-                res.status(500).send({
-                    
+                res.send({
+                    exitcode: 102,
                     message: "Delete failed"
                 })
             }

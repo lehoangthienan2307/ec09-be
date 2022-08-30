@@ -129,4 +129,30 @@ export default {
         return result || null;
     },
 
+    async getProductByOrderId(OrderID) {
+        const result = await db('orders')
+            .join('orderdetail', 'orders.OrderID', 'orderdetail.OrderID')
+            .join('product', 'orderdetail.ProID', 'product.ProID')
+            .where({
+                "orders.OrderID": OrderID
+             } )
+            .select(
+                "product.ProID",
+                "product.ProName",
+                "product.Price",
+                "product.image",
+                "orderdetail.Quantity"
+            )
+        return result || null;
+    },
+
+    async findTopSale(){
+       
+        const list = await db.select().from('product')
+        .whereNot('sold', null)
+            .orderBy('sold', 'desc')
+            .limit(6);     
+
+        return list
+    },
 }

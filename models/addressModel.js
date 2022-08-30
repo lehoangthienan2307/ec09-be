@@ -11,7 +11,11 @@ export default {
             .join('tinh', 'tinh.TinhID', 'quan.TinhID')
             .where({
                 'quan.TinhID': tinhid
-            }).select();
+            }).select(
+                "quan.QuanID",
+                "quan.name",
+                "tinh.TinhID"
+            );
         return result || null;
     },
 

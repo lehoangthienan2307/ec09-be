@@ -96,19 +96,19 @@ const sendEmailOrder = (to, orderEntity,products) => {
             <div><b>Order ID:</b> ${orderEntity.OrderID}</div>
             <div><b>Invoice:</b></div>
             <table style="border: 1px solid black">
-                <tr>
-                    <th>Tên sản phẩm</th>
-                    <th>Số lượng</th>
-                    <th>Amount</th>
-                </tr>
-                ${products.map(item => `
-                <tr>
-                    <td>${item.ProName}</td>
-                    <td>${item.quantity}</td>
-                    <td>${item.quantity * item.Price}</td>
-                </tr>
-                `).join('')}
-            </table>
+            <tr>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+            </tr>
+            ${products.map(item => `
+            <tr>
+                <td>${item.ProName}</td>
+                <td>${item.quantity}</td>
+                <td>${item.quantity * (item.Price)}</td>
+            </tr>
+            `).join('')}
+        </table>
             <div><b>Total: </b>${orderEntity.Total}</div>
             </div>
         `
