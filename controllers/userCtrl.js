@@ -145,7 +145,7 @@ export const userCtrl = {
     },
 
   
-    googleLogin: async (req, res) => {
+      googleLogin: async (req, res) => {
         try {
             const {tokenId} = req.body
 
@@ -164,14 +164,10 @@ export const userCtrl = {
             if(user){
                
 
-                const refresh_token = createRefreshToken(email)
-                res.cookie('refreshtoken', refresh_token, {
-                    httpOnly: true,
-                    path: '/auth/refresh_token',
-                    maxAge: 7*24*60*60*1000 // 7 days
-                })
+                const access_token= createAccessToken(email)
+               
 
-                res.json({msg: "Login success!"})
+                res.json({msg: "Login success!", access_token})
             }else{
                 const newUser = {
                     name, email, password: passwordHash
@@ -196,7 +192,6 @@ export const userCtrl = {
             return res.status(500).json({msg: err.message})
         }
     },
-
     
  }
 

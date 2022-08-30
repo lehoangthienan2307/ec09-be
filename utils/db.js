@@ -2,10 +2,10 @@ import fn from 'knex';
 
 
 export const connectionInfo = {
-  host: 'us-cdbr-east-06.cleardb.net',
-  user: 'b50b00284d04e4',
-  password: '67d87193',
-  database: 'heroku_acc8baa13741fee'
+  host: '127.0.0.1',
+  port: 3306,
+  user: 'root',
+  database: 'huimitu'
 };
 
 const knex = fn({

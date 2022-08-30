@@ -13,8 +13,8 @@ class MomoMethod {
         var orderId = new Date().valueOf() % 1000000;
         var orderInfo = "DH" + orderId;
         //link thong bao ket qua thanh toan
-       // var redirectUrl = `${redirectHost}/....`;
-        var redirectUrl = `${redirectHost}/returnUrl`;
+       // var redirectUrl = ${redirectHost}/....;
+        var redirectUrl = `${redirectHost}/account/order/confirm`;
         //var ipnUrl = "http://localhost:5000/api/checkout/momoNotify"; 
         var ipnUrl = `${ipnHost}/checkout/notifyMomo`; 
         var amount = total;
@@ -78,6 +78,10 @@ class MomoMethod {
             .update(rawSignature)
             .digest('hex');
         return (newSignature === signature);
+    }
+
+    getPrice = () => {
+        return 'vnd';
     }
 }
 

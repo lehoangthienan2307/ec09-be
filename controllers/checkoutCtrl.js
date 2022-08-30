@@ -10,14 +10,12 @@ import PaypalMethod from '../utils/PaypalCheckout.js';
 import MomoMethod from '../utils/MomoCheckout.js';
 import CodMethod from '../utils/ShipCodCheckout.js';
 import { sendEmailOrder } from "./sendMail.js";
-import {getDistance} from '../utils/distance.js'
+import {convert} from '../utils/convertPrice.js'
 
 
 export const checkoutCtrl ={
 
    
-   
-
     async getTempPrice(req, res, next) {
         try {
             const email = req.user;
@@ -48,18 +46,27 @@ export const checkoutCtrl ={
               })
             }
 
-            const distance = await getDistance(
-                province,
-                district,
-                ward, 
-                address
-            ) 
-    
-            let shippingPrice=20000 ;
-            if ((distance)/1000 > 2)
-					{
-						shippingPrice += (distance - 1)*10000
-					}
+            const des= `${address}, ${ward}, ${district}, ${province}`
+           distance.apiKey = "AIzaSyD_seiLom04fD_r8FSfrSmNFaIiZa7qk80"
+            const result = distance.get(
+           {	
+            origin: "227 Nguyễn Văn Cừ, Phường 4, Quận 5, Thành phố Hồ Chí Minh", 
+            destination: des,
+            mode: 'driving',
+            units: 'metric'
+        }, 
+        function(err, data) { 
+            if (err) {
+                console.error(err);
+                return res.status(500).json({msg: err.message});
+            }
+            const shippingDistance = Math.round(data.distanceValue/1000);
+            const destination = data.destination
+            let shippingPrice = 20000;
+            if (shippingDistance > 3)
+            {
+                shippingPrice += (shippingDistance - 3)*10000
+            }
             const totalPrice = total + shippingPrice;
           
             req.body.price = {
@@ -68,9 +75,12 @@ export const checkoutCtrl ={
                 totalPrice: totalPrice
             }
             req.body.items = items;
-            console.log(items)
+            next()
 
-           next()
+    })
+
+   
+       
         } catch (err) {
             next(err)
         }
@@ -132,44 +142,17 @@ export const checkoutCtrl ={
 
             // Calculate final price
             const { totalOrder, totalPrice, shippingPrice } = price;
-            const convertUSDPrice =  Math.round(100 * totalPrice /23000, 'VND') / 100;
-            console.log(method)
-            console.log(totalPrice)
-            console.log(checkoutMethod)
-            const [orderId, redirectUrl] = (method === 'Momo') ? (
-                await checkoutMethod.createLink(
-                    totalPrice,
-                    receiver_info,
-                    `${req.headers.origin}`,
-                    `${req.protocol}://${req.get('host')}`
-          
-                )
-            ) :
-             ((method === 'Paypal') ? (
-                await checkoutMethod.createLink(
-                    convertUSDPrice,
-                    receiver_info,
-                    `${req.headers.origin}`,
-                    `${req.protocol}://${req.get('host')}`
-          
-                )
-             ) : (
-                await checkoutMethod.createLink(
-                    totalPrice,
-                    receiver_info,
-                    `${req.headers.origin}`,
-                    `${req.protocol}://${req.get('host')}`
-          
-                )
-             ))  
+            const convertPrice = Math.round(100 * totalPrice * convert(
+                checkoutMethod.getPrice(), 'vnd')) / 100;
+
    
-            // const [orderId, redirectUrl] = await checkoutMethod.createLink(
-            //     convertUSDPrice,
-            //     receiver_info,
-            //     `${req.headers.origin}`,
-            //     `${req.protocol}://${req.get('host')}`
+            const [orderId, redirectUrl] = await checkoutMethod.createLink(
+                convertPrice,
+                receiver_info,
+                `${req.headers.origin}`,
+                `${req.protocol}://${req.get('host')}`
       
-            // );
+            );
             console.debug(redirectUrl)
             console.log(orderId)
       
@@ -225,7 +208,7 @@ export const checkoutCtrl ={
 
             const capture= await method.capturePayment(orderId);
             if (capture.status === "COMPLETED") {
-                await orderModel.updateState(orderId, 'Xác nhận');
+                await orderModel.updateState(orderId, 'Đang chờ xác nhận');
                 res.status(200).send({
                     message: "Payment has been captured"
                 });
@@ -240,26 +223,33 @@ export const checkoutCtrl ={
         }
     },
 
-    async notifyMomo(req, res) {
-        try {
-            const { orderId, resultCode } = req.body
-            const payMethod = new MomoMethod()
-            if (!payMethod.notify(req.body))
+    //Momo call post
+	momoNotify: async (req, res) => {
+		try {
+			const { orderId, resultCode } = req.body
+			const payMethod = new MomoMethod()
+			if (!payMethod.notify(req.body))
 			{
-				return res.status(500).json({message: "Signature is incompatible"})
+				res.status(500).json({msg: "Signature is incompatible"})
 			}
-            if (resultCode === 0) {
-                await orderModel.updateState(orderId, 'Xác nhận');
-            } else {
-                await orderModel.updateState(orderId, 'Đã hủy');
+			//update order
+			console.log(resultCode)
+			if (resultCode === 0) {
+				//success
+                await orderModel.updateState(orderId, "Đang chờ xác nhận");
+            } 
+			else {
+                await orderModel.updateState(orderId, "Đã hủy");
             }
-            res.status(204).send({}, { headers: {
-                "Content-Type": "application/json" }
+			res.status(204).send({}, { headers: {
+                    "Content-Type": "application/json" }
             })
-        } catch (err) {
-            return res.status(500).json({message: err.message})
-        }
-    }
+		}
+		catch (err)
+		{
+			return res.status(500).json({msg: err.message})
+		}
+	},
 
     
     
