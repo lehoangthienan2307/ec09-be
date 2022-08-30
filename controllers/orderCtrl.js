@@ -67,7 +67,7 @@ export default {
 
     async getList(req, res, next) {
         try {
-            const orderState="Xác nhận"
+            const orderState="Đang chờ xác nhận"
             const email = req.user;
               
             const orderList = await orderModel.getHistoryOrder(email, orderState);

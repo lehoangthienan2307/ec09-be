@@ -49,7 +49,7 @@ export default {
             "orders.OrderPrice",
            
         )
-        .orderBy('orderstatus.time')
+        .orderBy('orderstatus.time', 'desc')
         return result || null;
     },
 

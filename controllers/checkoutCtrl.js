@@ -16,6 +16,8 @@ import {convert} from '../utils/convertPrice.js'
 export const checkoutCtrl ={
 
    
+   
+
     async getTempPrice(req, res, next) {
         try {
             const email = req.user;
@@ -72,7 +74,8 @@ export const checkoutCtrl ={
             req.body.price = {
                 totalOrder: total,
                 shippingPrice: shippingPrice,
-                totalPrice: totalPrice
+                totalPrice: totalPrice,
+                distance:shippingDistance
             }
             req.body.items = items;
             next()
@@ -92,7 +95,8 @@ export const checkoutCtrl ={
             res.status(200).send({
                 totalOrder: price.totalOrder,
                 shippingPrice: price.shippingPrice,
-                totalPrice: price.totalPrice
+                totalPrice: price.totalPrice,
+                distance:price.distance
             })
         } catch (err) {
             next(err)

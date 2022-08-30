@@ -145,7 +145,7 @@ export const userCtrl = {
     },
 
   
-      googleLogin: async (req, res) => {
+    googleLogin: async (req, res) => {
         try {
             const {tokenId} = req.body
 
@@ -192,6 +192,7 @@ export const userCtrl = {
             return res.status(500).json({msg: err.message})
         }
     },
+
     
  }
 

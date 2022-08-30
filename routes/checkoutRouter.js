@@ -23,7 +23,6 @@ router.post(
 
 
 router.post('/notifyPaypal',auth, checkoutCtrl.notifyPaypal)
-router.post('/notifyMomo',checkoutCtrl.notifyMomo)
-
+router.post('/notifyMomo', auth,checkoutCtrl.momoNotify)
 
 export default router;

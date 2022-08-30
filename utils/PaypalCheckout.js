@@ -94,6 +94,10 @@ class PaypalMethod {
         return data;
     }
 
+    getPrice = () => {
+        return 'usd';
+    }
+
    
 }
 

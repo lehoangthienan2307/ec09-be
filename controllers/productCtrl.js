@@ -108,8 +108,17 @@ export const productCtrl = {
       getTopSale: async(req, res) => {
         try {
           const list= await productModel.findTopSale()
+          const items=[]
+          for (const item of list) {
+            items.push({
+              ProID: item.ProID,
+              ProName: item.ProName,
+              image: item.image,
+              Price: item.Price
+          })
+        }
           return res.status(200).send({
-            list
+            result:items
           })
     
         } catch (err) {
