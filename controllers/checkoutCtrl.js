@@ -133,15 +133,41 @@ export const checkoutCtrl ={
             // Calculate final price
             const { totalOrder, totalPrice, shippingPrice } = price;
             const convertUSDPrice =  Math.round(100 * totalPrice /23000, 'VND') / 100;
-
+            
+            const [orderId, redirectUrl] = (method === 'Momo') ? (
+                await checkoutMethod.createLink(
+                    totalPrice,
+                    receiver_info,
+                    `${req.headers.origin}`,
+                    `${req.protocol}://${req.get('host')}`
+          
+                )
+            ) :
+             ((method === 'Paypal') ? (
+                await checkoutMethod.createLink(
+                    convertUSDPrice,
+                    receiver_info,
+                    `${req.headers.origin}`,
+                    `${req.protocol}://${req.get('host')}`
+          
+                )
+             ) : (
+                await checkoutMethod.createLink(
+                    totalPrice,
+                    receiver_info,
+                    `${req.headers.origin}`,
+                    `${req.protocol}://${req.get('host')}`
+          
+                )
+             ))  
    
-            const [orderId, redirectUrl] = await checkoutMethod.createLink(
-                convertUSDPrice,
-                receiver_info,
-                `${req.headers.origin}`,
-                `${req.protocol}://${req.get('host')}`
+            // const [orderId, redirectUrl] = await checkoutMethod.createLink(
+            //     convertUSDPrice,
+            //     receiver_info,
+            //     `${req.headers.origin}`,
+            //     `${req.protocol}://${req.get('host')}`
       
-            );
+            // );
             console.debug(redirectUrl)
             console.log(orderId)
       
