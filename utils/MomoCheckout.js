@@ -16,7 +16,7 @@ class MomoMethod {
        // var redirectUrl = ${redirectHost}/....;
         var redirectUrl = `${redirectHost}/account/order/confirm`;
         //var ipnUrl = "http://localhost:5000/api/checkout/momoNotify"; 
-        var ipnUrl = `${ipnHost}/checkout/notifyMomo`; 
+        var ipnUrl = `${ipnHost}/product/notifyMomo`; 
         var amount = total;
         var requestType = "captureWallet"
         var extraData = "";      
