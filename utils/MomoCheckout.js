@@ -4,7 +4,7 @@ import config from "../config/constants.js";
 
 class MomoMethod {
     //
-    createLink = async (total, redirectHost, ipnHost) => {
+    createLink = async (total, userInfo, redirectHost, ipnHost) => {
         
         var partnerCode = config.MOMO_PARTNER_CODE;
         var accessKey = config.MOMO_ACCESS_KEY;
@@ -16,7 +16,7 @@ class MomoMethod {
        // var redirectUrl = `${redirectHost}/....`;
         var redirectUrl = `${redirectHost}/returnUrl`;
         //var ipnUrl = "http://localhost:5000/api/checkout/momoNotify"; 
-        var ipnUrl = `${ipnHost}`; 
+        var ipnUrl = `${ipnHost}/checkout/notifyMomo`; 
         var amount = total;
         var requestType = "captureWallet"
         var extraData = "";      
@@ -49,7 +49,7 @@ class MomoMethod {
             requestBody
         )
         
-        return [res.data.payUrl, orderId]
+        return [orderId, res.data.payUrl]
 
     }
 

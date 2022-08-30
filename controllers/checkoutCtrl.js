@@ -210,6 +210,27 @@ export const checkoutCtrl ={
         } catch (err) {
             next(err)
         }
+    },
+
+    async notifyMomo(req, res) {
+        try {
+            const { orderId, resultCode } = req.body
+            const payMethod = new MomoMethod()
+            if (!payMethod.notify(req.body))
+			{
+				return res.status(500).json({message: "Signature is incompatible"})
+			}
+            if (resultCode === 0) {
+                await orderModel.updateState(orderId, 'Xác nhận');
+            } else {
+                await orderModel.updateState(orderId, 'Đã hủy');
+            }
+            res.status(204).send({}, { headers: {
+                "Content-Type": "application/json" }
+            })
+        } catch (err) {
+            return res.status(500).json({message: err.message})
+        }
     }
 
     
