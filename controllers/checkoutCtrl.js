@@ -224,7 +224,7 @@ export const checkoutCtrl ={
     },
 
     //Momo call post
-	momoNotify: async (req, res) => {
+	notifyMomo: async (req, res) => {
 		try {
 			const { orderId, resultCode } = req.body
 			const payMethod = new MomoMethod()
